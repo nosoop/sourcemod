@@ -80,13 +80,21 @@ CallWrapper::CallWrapper(const SourceHook::ProtoInfo *protoInfo) : m_FnFlags(0)
 CallWrapper::CallWrapper(const SourceHook::ProtoInfo *protoInfo, const PassInfo *retInfo,
                          const PassInfo paramInfo[], unsigned int fnFlags) : CallWrapper(protoInfo)
 {
-	m_RetParam->fields = retInfo->fields;
+	m_RetParam->fields = new ObjectField[retInfo->numFields];
+	for (unsigned int i = 0; i < retInfo->numFields; i++)
+	{
+		m_RetParam->fields[i] = retInfo->fields[i];
+	}
 	m_RetParam->numFields = retInfo->numFields;
 	
 	unsigned int argnum = protoInfo->numOfParams;
 	for (unsigned int i = 0; i < argnum; i++)
 	{
-		m_Params[i].info.fields = paramInfo[i].fields;
+		m_Params[i].info.fields = new ObjectField[paramInfo[i].numFields];
+		for (unsigned int j = 0; j < paramInfo[i].numFields; j++)
+		{
+			m_Params[i].info.fields[j] = paramInfo[i].fields[j];
+		}
 		m_Params[i].info.numFields = paramInfo[i].numFields;
 	}
 	

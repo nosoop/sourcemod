@@ -74,6 +74,7 @@ size_t ValveParamToBinParam(ValveType type,
 				info->type = PassType_Object;
 				info->flags = flags | PASSFLAG_OASSIGNOP | PASSFLAG_OCTOR;
 				info->size = sizeof(Vector);
+				info->fields = new ObjectField[3];
 				info->fields[0] = info->fields[1] = info->fields[2] = ObjectField::Float;
 				info->numFields = 3;
 			} else {
@@ -99,6 +100,7 @@ size_t ValveParamToBinParam(ValveType type,
 				info->type = PassType_Object;
 				info->flags = flags | PASSFLAG_OASSIGNOP | PASSFLAG_OCTOR;
 				info->size = sizeof(QAngle);
+				info->fields = new ObjectField[3];
 				info->fields[0] = info->fields[1] = info->fields[2] = ObjectField::Float;
 				info->numFields = 3;
 			} else {

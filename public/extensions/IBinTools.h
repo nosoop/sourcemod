@@ -100,6 +100,11 @@ namespace SourceMod
 			: type(type), flags(flags), size(size), fields(fields), numFields(numFields)
 		{ }
 		
+		~PassInfo()
+		{
+			delete [] fields;
+		}
+		
 		PassType type;			/**< PassType value */
 		unsigned int flags;		/**< Pass/return flags */
 		size_t size;			/**< Size of the data being passed */

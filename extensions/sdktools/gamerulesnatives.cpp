@@ -523,7 +523,28 @@ static cell_t GameRules_GetPropString(IPluginContext *pContext, const cell_t *pa
 	
 	offset = info.actual_offset;
 	
-	if (info.prop->GetType() != DPT_String)
+	cell_t element = params[0] > 3? params[4] : 0;
+	if (info.prop->GetType() == DPT_Array)
+	{
+		if (element < 0 || element >= info.prop->GetNumElements())
+		{
+			return pContext->ThrowNativeError("Element %d is out of bounds (Prop %s has %d elements).",
+					element,
+					prop,
+					info.prop->GetNumElements());
+		}
+		offset += element * info.prop->GetElementStride();
+	}
+	else if (info.prop->GetType() == DPT_String)
+	{
+		if (element > 0)
+		{
+			return pContext->ThrowNativeError("SendProp %s is not an array. Element %d is invalid.",
+					prop,
+					element);
+		}
+	}
+	else
 	{
 		return pContext->ThrowNativeError("SendProp %s type is not a string (%d != %d)",
 				prop,
@@ -582,18 +603,39 @@ static cell_t GameRules_SetPropString(IPluginContext *pContext, const cell_t *pa
 	{
 		return pContext->ThrowNativeError("Property \"%s\" not found on the gamerules proxy", prop);
 	}
-	
+
 	offset = info.actual_offset;
-	
-	if (info.prop->GetType() != DPT_String)
+
+	cell_t element = params[0] > 3? params[4] : 0;
+	if (info.prop->GetType() == DPT_Array)
+	{
+		if (element < 0 || element >= info.prop->GetNumElements())
+		{
+			return pContext->ThrowNativeError("Element %d is out of bounds (Prop %s has %d elements).",
+					element,
+					prop,
+					info.prop->GetNumElements());
+		}
+		maxlen = info.prop->GetElementStride();
+		offset += element * maxlen;
+	}
+	else if (info.prop->GetType() == DPT_String)
+	{
+		if (element > 0)
+		{
+			return pContext->ThrowNativeError("SendProp %s is not an array. Element %d is invalid.",
+					prop,
+					element);
+		}
+		maxlen = DT_MAX_STRING_BUFFERSIZE;
+	}
+	else
 	{
 		return pContext->ThrowNativeError("SendProp %s type is not a string (%d != %d)",
 				prop,
 				info.prop->GetType(),
 				DPT_String);
 	}
-
-	maxlen = DT_MAX_STRING_BUFFERSIZE;
 
 	char *src;
 	char *dest = (char *)((intptr_t)pGameRules + offset);
@@ -603,7 +645,7 @@ static cell_t GameRules_SetPropString(IPluginContext *pContext, const cell_t *pa
 
 	edict_t *proxyEdict = gamehelpers->EdictOfIndex(gamehelpers->EntityToBCompatRef(pProxy));
 	if (proxyEdict != NULL)
-		gamehelpers->SetEdictStateChanged(proxyEdict, offset);
+		gamehelpers->SetEdictStateChanged(proxyEdict, info.actual_offset);
 
 	return len;
 }

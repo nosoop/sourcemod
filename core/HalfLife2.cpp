@@ -343,6 +343,20 @@ bool UTIL_FindInSendTable(SendTable *pTable,
 					return true;
 				}
 			}
+			
+			// access fixed arrays; this is implemented as two adjacent SendProps with the same name
+			// TODO how do we recover the underlying type? we only get DPT_Array
+			if (prop->IsInsideArray() && i+1 < props)
+			{
+				SendProp *pAdjacentProp = pTable->GetProp(i+1);
+				pname = pAdjacentProp->GetName();
+				if (pname && strcmp(name, pname) == 0)
+				{
+					info->prop = pAdjacentProp;
+					info->actual_offset = offset + prop->GetOffset();
+					return true;
+				}
+			}
 			info->prop = prop;
 			info->actual_offset = offset + info->prop->GetOffset();
 			return true;
